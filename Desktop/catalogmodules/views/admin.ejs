@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Админ-панель – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+    <div class="main-content">
+        <h1>🛡️ Админ-панель</h1>
+
+        <h2>Модули</h2>
+        <div class="module-grid">
+            <% modules.forEach(mod => { %>
+                <div class="module-card">
+                    <h3><%= mod.name %></h3>
+                    <p>Автор: <%= mod.minecraft_nickname || mod.discord_username %></p>
+                    <form action="/admin/module/<%= mod.id %>/delete" method="post" onsubmit="return confirm('Удалить модуль?');">
+                        <button class="btn" style="background:#b54141;">Удалить модуль</button>
+                    </form>
+                </div>
+            <% }) %>
+        </div>
+
+        <h2>Пользователи</h2>
+<div class="user-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; margin-top:15px;">
+            <% users.forEach(u => { %>
+                <div class="module-card" style="text-align:center;">
+                    <img src="<%= u.custom_avatar || u.avatar_url %>" class="profile-avatar" style="width:60px; height:60px;">
+                    <p><%= u.minecraft_nickname || u.discord_username %></p>
+                    <p><span class="role-badge role-<%= u.highest_role.toLowerCase() %>"><%= u.highest_role %></span></p>
+                    <form action="/admin/user/<%= u.id %>/ban" method="post" onsubmit="return confirm('Забанить пользователя? Это удалит все его модули и комментарии.');">
+                        <button class="btn" style="background:#b54141;">Забанить</button>
+                    </form>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <script>
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+            });
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        }
+    </script>
+</body>
+</html>

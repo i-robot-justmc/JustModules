@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= targetUser.minecraft_nickname || targetUser.discord_username %> – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">JustModule</div>
+        <a href="/">🏠 Главная</a>
+        <a href="/profile">👤 Профиль</a>
+        <a href="/users">👥 Пользователи</a>
+        <a href="/profile/upload">📤 Загрузить модуль</a>
+        <a href="/auth/logout">🚪 Выйти</a>
+    </div>
+    <div class="main-content">
+        <h1><%= targetUser.minecraft_nickname || targetUser.discord_username %></h1>
+        <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px;">
+            <img src="<%= targetUser.custom_avatar || targetUser.avatar_url %>" class="profile-avatar" style="width:100px; height:100px;">
+            <div>
+                <p style="margin:4px 0;"><strong>Discord:</strong> <%= targetUser.discord_username %></p>
+                <p style="margin:4px 0;">
+                    <strong>Ранг:</strong> 
+                    <% if (targetUser.highest_role && targetUser.highest_role !== 'None') { %>
+                        <span class="role-badge role-<%= targetUser.highest_role.toLowerCase() %>"><%= targetUser.highest_role %></span>
+                    <% } else { %> None <% } %>
+                    &nbsp;&nbsp; ⭐ <%= avgRating %> / 5 (оценок: <%= ratingCount %>)
+                </p>
+            </div>
+        </div>
+
+        <% if (user && user.id !== targetUser.id) { %>
+            <div style="margin-bottom:25px;">
+                <h3>Оценить пользователя</h3>
+                <form action="/user/<%= targetUser.id %>/rate" method="post" style="display:flex; gap:10px; align-items:center;">
+                    <select name="score" style="width:auto;">
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                    <button type="submit" class="btn">Оценить</button>
+                </form>
+            </div>
+        <% } %>
+
+        <h3>💬 Комментарии</h3>
+        <% if (user) { %>
+            <form action="/user/<%= targetUser.id %>/comment" method="post" style="margin-bottom:20px;">
+                <textarea name="text" class="comment-textarea" placeholder="Оставьте комментарий..." required></textarea>
+                <button type="submit" class="btn">Отправить</button>
+            </form>
+        <% } %>
+
+        <% comments.forEach(c => { %>
+            <div class="comment-box">
+                <div class="comment-author-row">
+                    <strong style="color:#c084fc;"><%= c.minecraft_nickname || c.discord_username %></strong>
+                    <% if (c.highest_role) { %><span class="role-badge role-<%= c.highest_role.toLowerCase() %>"><%= c.highest_role %></span><% } %>
+                </div>
+                <p class="comment-text"><%= c.text %></p>
+                <small class="comment-date"><%= c.created_at %></small>
+            </div>
+        <% }) %>
+    </div>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

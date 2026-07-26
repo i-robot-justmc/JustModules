@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Каталог модулей – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+
+    <!-- Модальное окно "О проекте" (встроено) -->
+    <div id="aboutModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ℹ️ О проекте</h2>
+                <span class="modal-close" onclick="closeAboutModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>JustMC Catalog</strong> – официальный каталог модулей для сервера JustMC.</p>
+                <p>Здесь ты можешь:</p>
+                <ul>
+                    <li>📤 Делиться модулями</li>
+                    <li>📥 Находить модули</li>
+                    <li>⭐ Оценивать</li>
+                    <li>👥 Общаться</li>
+                </ul>
+                <p>Подробнее – в Discord.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeAboutModal()">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <% if (!user) { %>
+            <div style="text-align:center; margin-top:80px;">
+                <h1>Добро пожаловать в каталог модулей</h1>
+                <p style="color:#9ca3af; margin:20px 0;">Загружай, делись и устанавливай модули для сервера JustMC.<br>Привяжи аккаунт и начни уже сейчас!</p>
+                <a href="/auth/discord" class="btn" style="font-size:1.2rem; padding:15px 40px;">🔑 Войти через Discord</a>
+            </div>
+        <% } else { %>
+            <h1>📦 Каталог модулей</h1>
+
+            <!-- Строка поиска с кнопкой фильтров -->
+            <div class="search-row">
+                <input type="text" id="search-input" class="search-field" placeholder="Поиск модулей..." value="<%= search %>">
+                <button type="button" id="filter-toggle-btn" class="btn-icon">⋮</button>
+            </div>
+
+            <!-- Панель фильтров (скрыта) -->
+            <div id="filter-panel" class="filter-panel" style="display: none;">
+                <select id="category-select">
+                    <option value="all" <%= currentCategory==='all' ? 'selected' : '' %>>Все категории</option>
+                    <option value="Работа с текстом" <%= currentCategory==='Работа с текстом' ? 'selected' : '' %>>Работа с текстом</option>
+                    <option value="Игровые механики" <%= currentCategory==='Игровые механики' ? 'selected' : '' %>>Игровые механики</option>
+                    <option value="Команды" <%= currentCategory==='Команды' ? 'selected' : '' %>>Команды</option>
+                    <option value="Инструментарий" <%= currentCategory==='Инструментарий' ? 'selected' : '' %>>Инструментарий</option>
+                    <option value="Генерация" <%= currentCategory==='Генерация' ? 'selected' : '' %>>Генерация</option>
+                    <option value="Музыка и звуки" <%= currentCategory==='Музыка и звуки' ? 'selected' : '' %>>Музыка и звуки</option>
+                    <option value="Работа с переменными" <%= currentCategory==='Работа с переменными' ? 'selected' : '' %>>Работа с переменными</option>
+                    <option value="Разное" <%= currentCategory==='Разное' ? 'selected' : '' %>>Разное</option>
+                </select>
+                <select id="sort-select">
+                    <option value="newest" <%= currentSort==='newest' ? 'selected' : '' %>>Новые</option>
+                    <option value="oldest" <%= currentSort==='oldest' ? 'selected' : '' %>>Старые</option>
+                    <option value="popular" <%= currentSort==='popular' ? 'selected' : '' %>>Популярные</option>
+                    <option value="rating" <%= currentSort==='rating' ? 'selected' : '' %>>По рейтингу</option>
+                </select>
+            </div>
+
+            <!-- Рекомендованные модули (только если нет поиска и категории) -->
+            <% if (recommended.length > 0 && !search && currentCategory==='all') { %>
+                <h2>🌟 Рекомендованные</h2>
+                <div class="module-grid" style="margin-bottom:30px;">
+                    <% recommended.forEach(mod => { %>
+                        <a href="/module/<%= mod.id %>" style="text-decoration:none; color:inherit;">
+                            <div class="module-card">
+                                <h3><%= mod.name %></h3>
+                                <p>Автор: <%= mod.minecraft_nickname %></p>
+                                <span class="role-badge role-<%= mod.highest_role.toLowerCase() %>"><%= mod.highest_role %></span>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+            <% } %>
+
+            <!-- Список модулей -->
+            <div class="module-grid">
+                <% if (modules.length === 0) { %>
+                    <p style="color:#9ca3af;">Ничего не найдено</p>
+                <% } else { %>
+                    <% modules.forEach(mod => { %>
+                        <a href="/module/<%= mod.id %>" style="text-decoration:none; color:inherit;">
+                            <div class="module-card">
+                                <h3><%= mod.name %></h3>
+                                <p><%= mod.minecraft_nickname %> <span class="role-badge role-<%= mod.highest_role.toLowerCase() %>"><%= mod.highest_role %></span></p>
+                                <p><%= mod.description?.substring(0, 80) %></p>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span><%= mod.category %></span>
+                                    <button class="copy-command-btn" data-command="/module load <%= mod.minecraft_nickname %>/<%= mod.name %>" onclick="event.preventDefault(); event.stopPropagation();">📋</button>
+                                </div>
+                            </div>
+                        </a>
+                    <% }) %>
+                <% } %>
+            </div>
+
+            <% if (user.minecraft_nickname) { %>
+                <a href="/profile/upload" class="add-module-btn">+</a>
+            <% } %>
+        <% } %>
+    </div>
+
+    <script>
+        // Поиск и фильтры
+        const searchInput = document.getElementById('search-input');
+        const categorySelect = document.getElementById('category-select');
+        const sortSelect = document.getElementById('sort-select');
+        const filterToggleBtn = document.getElementById('filter-toggle-btn');
+        const filterPanel = document.getElementById('filter-panel');
+
+        filterToggleBtn.addEventListener('click', () => {
+            filterPanel.style.display = filterPanel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        function applyFilters() {
+            const search = searchInput.value;
+            const category = categorySelect.value;
+            const sort = sortSelect.value;
+            let url = '/?';
+            if (search) url += 'search=' + encodeURIComponent(search) + '&';
+            if (category && category !== 'all') url += 'category=' + encodeURIComponent(category) + '&';
+            if (sort && sort !== 'newest') url += 'sort=' + encodeURIComponent(sort);
+            window.location.href = url;
+        }
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        categorySelect.addEventListener('change', applyFilters);
+        sortSelect.addEventListener('change', applyFilters);
+    </script>
+
+    <script>
+        // Копирование команд
+        document.querySelectorAll('.copy-command-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cmd = btn.dataset.command;
+                navigator.clipboard.writeText(cmd).then(() => {
+                    btn.textContent = '✅';
+                    setTimeout(() => { btn.textContent = '📋'; }, 1500);
+                });
+            });
+        });
+    </script>
+
+    <script>
+        // Тема
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+            });
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        }
+    </script>
+
+    <script>
+        // Модальное окно "О проекте"
+        function showAboutModal() {
+            document.getElementById('aboutModal').style.display = 'flex';
+        }
+        function closeAboutModal() {
+            document.getElementById('aboutModal').style.display = 'none';
+            localStorage.setItem('hasSeenAbout', 'true');
+        }
+
+        // Проверка: есть ли пользователь (определяем по наличию кнопки "Выйти" в сайдбаре)
+        const logoutLink = document.querySelector('a[href="/auth/logout"]');
+        if (logoutLink) {
+            // Пользователь авторизован
+            if (!localStorage.getItem('hasSeenAbout')) {
+                showAboutModal();
+            }
+        }
+    </script>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

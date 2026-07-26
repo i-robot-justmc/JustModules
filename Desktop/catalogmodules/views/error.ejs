@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= code === 403 ? 'Доступ запрещён' : 'Модуль не найден' %> – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+    <div class="main-content" style="display:flex; align-items:center; justify-content:center; min-height:60vh;">
+        <div class="module-card" style="text-align:center; max-width:500px;">
+            <% if (code === 403) { %>
+                <h2 style="color:#f87171;">🚫 Доступ запрещён</h2>
+                <p style="margin:15px 0;">У вас нет прав для выполнения этого действия.</p>
+            <% } else { %>
+                <h2 style="color:#fbbf24;">🔍 Модуль не найден</h2>
+                <p style="margin:15px 0;">Возможно, он был удалён или вы указали неверную ссылку.</p>
+            <% } %>
+            <a href="/profile" class="btn">Вернуться в профиль</a>
+        </div>
+    </div>
+
+    <script>
+        const themeBtn = document.getElementById('theme-btn');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+            });
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        }
+    </script>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

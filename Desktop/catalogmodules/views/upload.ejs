@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Загрузить модуль – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">JustModule</div>
+        <a href="/">🏠 Главная</a>
+        <a href="/profile">👤 Профиль</a>
+        <a href="/users">👥 Пользователи</a>
+        <a href="/favorites">⭐ Избранное</a>
+        <a href="/profile/upload">📤 Загрузить модуль</a>
+        <a href="/auth/logout">🚪 Выйти</a>
+    </div>
+    <div class="main-content">
+        <h1>📤 Загрузить модуль</h1>
+        <form action="/profile/upload" method="post" enctype="multipart/form-data">
+            <label>Название модуля:</label>
+            <input type="text" name="name" required placeholder="MyModule">
+            <label>Описание:</label>
+            <textarea name="description" rows="4" placeholder="Что делает ваш модуль?"></textarea>
+            <label>Категория:</label>
+            <select name="category">
+                <option value="Работа с текстом">Работа с текстом</option>
+                <option value="Игровые механики">Игровые механики</option>
+                <option value="Команды">Команды</option>
+                <option value="Инструментарий">Инструментарий</option>
+                <option value="Генерация">Генерация</option>
+                <option value="Музыка и звуки">Музыка и звуки</option>
+                <option value="Работа с переменными">Работа с переменными</option>
+                <option value="Разное" selected>Разное</option>
+            </select>
+            <label>Скриншоты (до 5, можно выбрать несколько):</label>
+            <input type="file" name="screenshots" accept="image/*" multiple>
+            <button type="submit" class="btn">Загрузить</button>
+        </form>
+    </div>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

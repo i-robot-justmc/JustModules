@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Редактировать модуль – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">JustModule</div>
+        <a href="/">🏠 Главная</a>
+        <a href="/profile">👤 Профиль</a>
+        <a href="/users">👥 Пользователи</a>
+        <a href="/profile/upload">📤 Загрузить модуль</a>
+        <a href="/auth/logout">🚪 Выйти</a>
+    </div>
+    <div class="main-content">
+        <h1>✏️ Редактировать модуль</h1>
+        <form action="/module/<%= mod.id %>/edit" method="post" style="margin-bottom:30px;">
+            <label>Название:</label>
+            <input type="text" name="name" value="<%= mod.name %>" required>
+            <label>Описание:</label>
+            <textarea name="description" rows="5"><%= mod.description %></textarea>
+            <button type="submit" class="btn">Сохранить изменения</button>
+        </form>
+
+        <h2>🖼️ Скриншоты</h2>
+        <% if (screenshots.length === 0) { %>
+            <p style="color:#9ca3af;">Нет скриншотов. Добавьте новые ниже.</p>
+        <% } else { %>
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
+                <% screenshots.forEach(img => { %>
+                    <div style="position:relative; display:inline-block;">
+                        <img src="/<%= img.path %>" style="max-height:120px; border-radius:8px;">
+                        <form action="/module/screenshot/<%= img.id %>/delete" method="post" style="position:absolute; top:5px; right:5px;">
+                            <button type="submit" style="background:#b54141; border:none; color:white; border-radius:50%; width:22px; height:22px; font-size:14px; cursor:pointer;">✕</button>
+                        </form>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <h3>Добавить скриншоты (до 5)</h3>
+        <form action="/module/<%= mod.id %>/screenshots" method="post" enctype="multipart/form-data">
+            <input type="file" name="screenshots" accept="image/*" multiple>
+            <button type="submit" class="btn" style="margin-top:10px;">Загрузить скриншоты</button>
+        </form>
+
+        <div style="margin-top:30px;">
+            <a href="/module/<%= mod.id %>" class="btn" style="background:#333;">← Вернуться к модулю</a>
+        </div>
+    </div>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

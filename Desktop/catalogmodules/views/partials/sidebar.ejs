@@ -1,0 +1,13 @@
+<div class="sidebar">
+  <div class="logo">⚡ JUSTMC</div>
+  <a href="/">🏠 Главная</a>
+  <a href="/profile">👤 Профиль</a>
+  <a href="/users">👥 Пользователи</a>
+  <a href="/favorites">⭐ Избранное</a>
+  <a href="/profile/upload">📤 Загрузить модуль</a>
+  <a href="#" onclick="event.preventDefault(); showAboutModal();" class="about-link">ℹ️ О проекте</a>
+  <% if (user && user.discord_username === 'sk1mix_justmc') { %>
+    <a href="/admin">🛡️ Админка</a>
+  <% } %>
+  <a href="/auth/logout">🚪 Выйти</a>
+</div>

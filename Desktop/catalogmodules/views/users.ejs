@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Пользователи – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">JustModule</div>
+        <a href="/">🏠 Главная</a>
+        <a href="/profile">👤 Профиль</a>
+        <a href="/users">👥 Пользователи</a>
+        <a href="/profile/upload">📤 Загрузить модуль</a>
+        <a href="/auth/logout">🚪 Выйти</a>
+    </div>
+    <div class="main-content">
+        <h1>👥 Пользователи</h1>
+        <div class="user-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; margin-top:20px;">
+            <% users.forEach(u => { %>
+                <a href="/user/<%= u.id %>" style="text-decoration:none; color:inherit;">
+                    <div class="module-card" style="text-align:center;">
+                        <img src="<%= u.custom_avatar || u.avatar_url %>" class="profile-avatar" style="width:80px; height:80px; margin-bottom:10px;">
+                        <h3 style="margin-bottom:5px;">
+                            <%= u.minecraft_nickname || u.discord_username %>
+                        </h3>
+                        <p style="color:#9ca3af; margin:5px 0;">
+                            <% if (u.highest_role && u.highest_role !== 'None') { %>
+                                <span class="role-badge role-<%= u.highest_role.toLowerCase() %>"><%= u.highest_role %></span>
+                            <% } else { %>
+                                <span style="color:#666;">Нет роли</span>
+                            <% } %>
+                        </p>
+                        <p style="margin:5px 0;">⭐ <%= u.avgRating || '0' %> / 5 (<%= u.ratingCount || 0 %>)</p>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    </div>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Избранное – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">JustModule</div>
+        <a href="/">🏠 Главная</a>
+        <a href="/profile">👤 Профиль</a>
+        <a href="/users">👥 Пользователи</a>
+        <a href="/favorites">⭐ Избранное</a>
+        <a href="/profile/upload">📤 Загрузить модуль</a>
+        <a href="/auth/logout">🚪 Выйти</a>
+    </div>
+    <div class="main-content">
+        <h1>⭐ Избранные модули</h1>
+        <div class="module-grid">
+            <% if (modules.length === 0) { %>
+                <p style="color:#9ca3af;">Нет избранных модулей</p>
+            <% } else { %>
+                <% modules.forEach(mod => { %>
+                    <a href="/module/<%= mod.id %>" style="text-decoration:none; color:inherit;">
+                        <div class="module-card">
+                            <h3><%= mod.name %></h3>
+                            <p><%= mod.minecraft_nickname %></p>
+                        </div>
+                    </a>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

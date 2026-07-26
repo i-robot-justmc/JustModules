@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Профиль – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/sidebar') %>
+
+    <!-- Модальное окно "О проекте" -->
+    <div id="aboutModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ℹ️ О проекте</h2>
+                <span class="modal-close" onclick="closeAboutModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>JustMC Catalog</strong> – официальный каталог модулей для сервера JustMC.</p>
+                <p>Здесь ты можешь:</p>
+                <ul>
+                    <li>📤 Делиться модулями</li>
+                    <li>📥 Находить модули</li>
+                    <li>⭐ Оценивать</li>
+                    <li>👥 Общаться</li>
+                </ul>
+                <p>Подробнее – в Discord.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeAboutModal()">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно настроек -->
+    <%- include('partials/settings_modal') %>
+
+    <div class="main-content">
+        <h1>👤 Мой профиль</h1>
+        <div class="profile-container" style="display:flex; gap:30px; align-items:center; margin-bottom:30px;">
+            <img src="<%= user.custom_avatar || user.avatar_url %>" class="profile-avatar">
+            <div>
+                <p><strong>Discord:</strong> <%= user.discord_username %></p>
+                <p><strong>Minecraft:</strong> <%= user.minecraft_nickname || 'Не привязан' %></p>
+                <p><strong>Ранг:</strong>
+                    <% if (user.highest_role && user.highest_role !== 'None') { %>
+                        <span class="role-badge role-<%= user.highest_role.toLowerCase() %>"><%= user.highest_role %></span>
+                    <% } else { %> None <% } %>
+                </p>
+                <p><strong>Рейтинг:</strong> ⭐ <%= avgRating %> / 5 (всего оценок: <%= ratingCount %>)</p>
+                <% if (!user.minecraft_nickname) { %>
+                    <button id="link-btn" class="btn">Привязать никнейм</button>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Контекстное меню аватара -->
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+        <div id="avatarContextMenu" style="display:none; position:absolute; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:8px 0; z-index:200; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
+            <a href="#" id="uploadAvatarOption" style="display:block; padding:8px 20px; color:#e5e7eb; text-decoration:none;">📷 Загрузить новый аватар</a>
+            <a href="#" id="settingsOption" style="display:block; padding:8px 20px; color:#e5e7eb; text-decoration:none;">⚙️ Настройки</a>
+        </div>
+
+        <h2>📁 Мои модули</h2>
+        <div class="module-grid">
+            <% if (modules.length === 0) { %>
+                <p style="color:#9ca3af;">Вы ещё не загрузили ни одного модуля.</p>
+            <% } else { %>
+                <% modules.forEach(mod => { %>
+                    <div class="module-card">
+                        <h3><a href="/module/<%= mod.id %>"><%= mod.name %></a></h3>
+                        <p style="color:#9ca3af; margin:5px 0;"><%= mod.description?.substring(0, 50) %></p>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <a href="/module/<%= mod.id %>/edit" class="btn" style="padding:5px 10px;">✏️</a>
+                            <form action="/module/<%= mod.id %>/delete" method="post" onsubmit="return confirm('Удалить модуль?');">
+                                <button type="submit" class="btn" style="background:#b54141; padding:5px 10px;">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="/js/theme-init.js"></script>
+    <script>
+        // Аватар и меню
+        (function() {
+            const avatarImg = document.querySelector('.profile-avatar');
+            const avatarInput = document.getElementById('avatarInput');
+            const contextMenu = document.getElementById('avatarContextMenu');
+            const uploadOption = document.getElementById('uploadAvatarOption');
+            const settingsOption = document.getElementById('settingsOption');
+
+            if (avatarImg) {
+                avatarImg.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    contextMenu.style.display = 'block';
+                    contextMenu.style.left = e.pageX + 'px';
+                    contextMenu.style.top = e.pageY + 'px';
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!contextMenu.contains(e.target) && e.target !== avatarImg) {
+                        contextMenu.style.display = 'none';
+                    }
+                });
+
+                uploadOption.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    contextMenu.style.display = 'none';
+                    avatarInput.click();
+                });
+
+                settingsOption.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    contextMenu.style.display = 'none';
+                    openSettingsModal();
+                });
+
+                avatarImg.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    avatarImg.style.boxShadow = '0 0 25px var(--accent)';
+                });
+                avatarImg.addEventListener('dragleave', function(e) {
+                    avatarImg.style.boxShadow = '0 0 25px var(--accent-glow)';
+                });
+                avatarImg.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    avatarImg.style.boxShadow = '0 0 25px var(--accent-glow)';
+                    const file = e.dataTransfer.files[0];
+                    if (file) uploadAvatar(file);
+                });
+
+                avatarInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) uploadAvatar(file);
+                });
+
+                function uploadAvatar(file) {
+                    const formData = new FormData();
+                    formData.append('avatar', file);
+                    fetch('/profile/avatar', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => {
+                        if (res.ok) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                avatarImg.src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            alert('Ошибка загрузки.');
+                        }
+                    })
+                    .catch(err => {
+                        alert('Ошибка соединения');
+                        console.error(err);
+                    });
+                }
+            }
+        })();
+    </script>
+
+    <script>
+        // Управление настройками (модальное окно)
+        const themeToggle = document.getElementById('theme-toggle-checkbox');
+        const themeLabel = document.getElementById('theme-label');
+        const colorButtons = document.querySelectorAll('.color-btn');
+
+        // Синхронизация тумблера с реальным состоянием (после инициализации)
+        if (localStorage.getItem('theme') === 'light') {
+            themeToggle.checked = true;
+            themeLabel.textContent = 'Светлая';
+        } else {
+            themeToggle.checked = false;
+            themeLabel.textContent = 'Тёмная';
+        }
+
+        // Обновляем активную кнопку цвета
+        const currentColor = localStorage.getItem('colorScheme') || 'purple';
+        colorButtons.forEach(btn => {
+            if (btn.dataset.color === currentColor) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        // Обработчики
+        themeToggle.addEventListener('change', function() {
+            if (themeToggle.checked) {
+                document.body.classList.add('light-theme');
+                localStorage.setItem('theme', 'light');
+                themeLabel.textContent = 'Светлая';
+            } else {
+                document.body.classList.remove('light-theme');
+                localStorage.setItem('theme', 'dark');
+                themeLabel.textContent = 'Тёмная';
+            }
+        });
+
+        colorButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const color = this.dataset.color;
+                // Удаляем старые цветовые классы
+                document.body.classList.remove('theme-purple', 'theme-yellow', 'theme-orange', 'theme-blue', 'theme-green');
+                if (color !== 'purple') {
+                    document.body.classList.add('theme-' + color);
+                }
+                localStorage.setItem('colorScheme', color);
+                colorButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+            // Актуализируем тумблер
+            if (localStorage.getItem('theme') === 'light') {
+                themeToggle.checked = true;
+                themeLabel.textContent = 'Светлая';
+            } else {
+                themeToggle.checked = false;
+                themeLabel.textContent = 'Тёмная';
+            }
+        }
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+    </script>
+
+    <script>
+        // "О проекте"
+        function showAboutModal() {
+            document.getElementById('aboutModal').style.display = 'flex';
+        }
+        function closeAboutModal() {
+            document.getElementById('aboutModal').style.display = 'none';
+            localStorage.setItem('hasSeenAbout', 'true');
+        }
+        const logoutLink = document.querySelector('a[href="/auth/logout"]');
+        if (logoutLink) {
+            if (!localStorage.getItem('hasSeenAbout')) showAboutModal();
+        }
+    </script>
+    <script src="/js/theme-init.js"></script>
+</body>
+</html>

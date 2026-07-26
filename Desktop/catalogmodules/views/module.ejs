@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= mod.name %> – JustMC</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">⚡ JUSTMC</div>
+        <a href="/">🏠 Главная</a>
+        <a href="/profile">👤 Профиль</a>
+        <a href="/users">👥 Пользователи</a>
+        <a href="/favorites">⭐ Избранное</a>
+        <a href="/profile/upload">📤 Загрузить модуль</a>
+        <a href="/auth/logout">🚪 Выйти</a>
+    </div>
+    <div class="main-content">
+        <h1><%= mod.name %></h1>
+        <p style="color:#9ca3af; margin:4px 0;">
+            Автор: <%= mod.minecraft_nickname || 'Неизвестный' %>
+            <% if (mod.highest_role && mod.highest_role !== 'None') { %>
+                <span class="role-badge role-<%= mod.highest_role.toLowerCase() %>"><%= mod.highest_role %></span>
+            <% } %>
+            &nbsp;&nbsp; ⭐ <%= avgRating %> / 5 (оценок: <%= ratingCount %>)
+            &nbsp;&nbsp; Категория: <%= mod.category %>
+        </p>
+
+        <% if (user) { %>
+            <form action="/module/<%= mod.id %>/favorite" method="post" style="display:inline; margin-left:10px;">
+                <button type="submit" class="btn" style="background:<%= isFavorite ? '#f59e0b' : '#333' %>; padding:5px 10px;">
+                    <%= isFavorite ? '★' : '☆' %>
+                </button>
+            </form>
+        <% } %>
+
+        <p style="white-space: pre-wrap; margin:15px 0;"><%= mod.description %></p>
+
+        <% if (screenshots.length > 0) { %>
+            <div class="screenshot-gallery" style="display:flex; gap:10px; overflow-x:auto; margin:15px 0;">
+                <% screenshots.forEach(img => { %>
+                    <img src="/<%= img.path %>" style="max-height:150px; border-radius:8px; cursor:pointer;" onclick="window.open('/<%= img.path %>', '_blank')">
+                <% }) %>
+            </div>
+        <% } %>
+
+        <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+            <button class="copy-command-btn" data-command="/module load <%= mod.minecraft_nickname %>/<%= mod.name %>">📋 Копировать команду</button>
+        </div>
+
+        <% if (user && user.id === mod.owner_id) { %>
+            <div style="margin-bottom:15px;">
+                <a href="/module/<%= mod.id %>/edit" class="btn">✏️ Редактировать</a>
+                <form action="/module/<%= mod.id %>/delete" method="post" style="display:inline;">
+                    <button type="submit" class="btn" style="background: #b54141;">🗑️ Удалить</button>
+                </form>
+            </div>
+        <% } %>
+
+        <% if (user) { %>
+            <div style="margin-bottom:25px;">
+                <h3>Оценить модуль</h3>
+                <form action="/module/<%= mod.id %>/rate" method="post" style="display:flex; gap:10px; align-items:center;">
+                    <select name="score" style="width:auto;">
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                    <button type="submit" class="btn">Оценить</button>
+                </form>
+            </div>
+        <% } %>
+
+        <h3>💬 Комментарии</h3>
+        <% if (user) { %>
+            <form action="/module/<%= mod.id %>/comment" method="post" style="margin-bottom:20px;">
+                <textarea name="text" class="comment-textarea" placeholder="Оставьте комментарий..." required></textarea>
+                <button type="submit" class="btn">Отправить</button>
+            </form>
+        <% } %>
+
+        <% if (comments.length === 0) { %>
+            <p style="color:#9ca3af;">Пока нет комментариев. Будьте первым!</p>
+        <% } else { %>
+            <% comments.forEach(c => { %>
+                <div class="comment-box">
+                    <div class="comment-author-row">
+                        <strong style="color:#c084fc;"><%= c.minecraft_nickname || c.discord_username %></strong>
+                        <% if (c.highest_role) { %><span class="role-badge role-<%= c.highest_role.toLowerCase() %>"><%= c.highest_role %></span><% } %>
+                    </div>
+                    <p class="comment-text"><%= c.text %></p>
+                    <small class="comment-date"><%= c.created_at %></small>
+                </div>
+            <% }) %>
+        <% } %>
+    </div>
+
+    <script>
+    document.querySelector('.copy-command-btn').addEventListener('click', function(e) {
+        const cmd = this.dataset.command;
+        navigator.clipboard.writeText(cmd).then(() => {
+            this.textContent = '✅ Скопировано!';
+            setTimeout(() => { this.textContent = '📋 Копировать команду'; }, 2000);
+        });
+    });
+    </script>
+</body>
+</html>

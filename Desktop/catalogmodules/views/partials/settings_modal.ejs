@@ -1,0 +1,33 @@
+<div id="settingsModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>⚙️ Настройки</h2>
+      <span class="modal-close" onclick="closeSettingsModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <!-- Тема -->
+      <div class="setting-row">
+        <span>Тема</span>
+        <label class="switch">
+          <input type="checkbox" id="theme-toggle-checkbox">
+          <span class="slider round"></span>
+        </label>
+        <span id="theme-label">Тёмная</span>
+      </div>
+      <!-- Цветовая схема -->
+      <div class="setting-row">
+        <span>Цвет интерфейса</span>
+        <div class="color-options">
+          <button class="color-btn color-purple active" data-color="purple"></button>
+          <button class="color-btn color-yellow" data-color="yellow"></button>
+          <button class="color-btn color-orange" data-color="orange"></button>
+          <button class="color-btn color-blue" data-color="blue"></button>
+          <button class="color-btn color-green" data-color="green"></button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSettingsModal()">Готово</button>
+    </div>
+  </div>
+</div>
