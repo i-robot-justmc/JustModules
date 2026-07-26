@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const models = require('../models');
 const bot = require('../bot');
 const { getDatabase } = require('../database');
@@ -10,9 +11,21 @@ function ensureAuth(req, res, next) {
   res.redirect('/auth/discord');
 }
 
+// Папки для загрузок (можно задать через переменные окружения, иначе стандартные)
+const uploadDir = process.env.UPLOADS_PATH || 'uploads';
+const avatarDir = process.env.AVATARS_PATH || path.join(__dirname, '..', 'public', 'avatars');
+
+// Создаём папки, если их нет
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+if (!fs.existsSync(path.join(uploadDir, 'screenshots'))) fs.mkdirSync(path.join(uploadDir, 'screenshots'), { recursive: true });
+if (!fs.existsSync(avatarDir)) fs.mkdirSync(avatarDir, { recursive: true });
+
 // Настройка multer для скриншотов (до 5 файлов)
 const screenshotStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/screenshots/'),
+  destination: (req, file, cb) => {
+    const dest = path.join(uploadDir, 'screenshots');
+    cb(null, dest);
+  },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     const safeName = req.user.minecraft_nickname + '_' + Date.now() + ext;
@@ -31,8 +44,12 @@ const screenshotUpload = multer({
 
 // Настройка multer для аватара
 const avatarStorage = multer.diskStorage({
-  destination: 'public/avatars/',
-  filename: (req, file, cb) => cb(null, req.user.discord_id + '_' + Date.now() + path.extname(file.originalname))
+  destination: (req, file, cb) => cb(null, avatarDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const safeName = req.user.discord_id + '_' + Date.now() + ext;
+    cb(null, safeName);
+  }
 });
 const avatarUpload = multer({
   storage: avatarStorage,
