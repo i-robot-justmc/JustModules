@@ -53,8 +53,9 @@ app.use('/', ratingRoutes);
 app.use('/api', apiRoutes);
 app.use('/', adminRoutes);
 
-// Статические файлы загрузок (аватары, скриншоты)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Статические файлы загрузок
+const uploadsPath = process.env.UPLOADS_PATH || path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(uploadsPath));
 app.use('/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
 
 // Запуск сервера
