@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const path = require('path');
+const fs = require('fs');
 const passport = require('./auth');
 const models = require('./models');
 
@@ -53,10 +54,18 @@ app.use('/', ratingRoutes);
 app.use('/api', apiRoutes);
 app.use('/', adminRoutes);
 
-// Статические файлы загрузок
-const uploadsPath = process.env.UPLOADS_PATH || path.join(__dirname, 'uploads');
+// Статические файлы загрузок (используем переменные окружения или пути по умолчанию)
+const dataDir = process.env.DATA_DIR || __dirname;
+const uploadsPath = process.env.UPLOADS_PATH || path.join(dataDir, 'uploads');
+const avatarsPath = process.env.AVATARS_PATH || path.join(__dirname, 'public', 'avatars');
+
+// Создаём папки, если их нет
+[uploadsPath, avatarsPath].forEach(p => {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+});
+
 app.use('/uploads', express.static(uploadsPath));
-app.use('/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
+app.use('/avatars', express.static(avatarsPath));
 
 // Запуск сервера
 const port = process.env.PORT || 3000;
